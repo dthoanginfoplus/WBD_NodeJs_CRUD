@@ -1,5 +1,7 @@
 var conn = require('../config/configDB')
 var user = require('../models/user');
+var bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 exports.getUser = function (req, res) {
 		conn.query('SELECT * FROM user', function (err, results, fields) {
@@ -18,13 +20,29 @@ exports.getUser = function (req, res) {
 		});
 };
 
-exports.createUser = function(req,res) {
-    var data = new user(req.body);
-    let sql = "INSERT INTO user SET ?";
-    conn.query(sql, data, (err, results) => {
-        if(err) throw err;
-        res.status(201).send(results);
-    });
+exports.createUser = async function(req,res) {
+    var data = await new user(req.body);
+    let sql =  "SELECT * FROM user WHERE email='"+data.email+"'";
+        let query = await conn.query(sql, (err, results) => {
+            if(err) {
+                throw err;
+            } else {
+                if(results.length == 0) {
+                    bcrypt.hash(req.body.password, saltRounds, function (err, result) {
+                    data.password = result;
+                    let sql = "INSERT INTO user SET ?";
+                    conn.query(sql,data, (err, results) => {
+                    if(err) throw err;
+                    res.status(201).send(results);
+                    });
+                    });
+                } else {
+                    res.status(500).json({
+                        'message': "Email has been used"
+                    });
+                }
+            }
+        });
 };
 
 exports.findUserById = function(req,res) {
@@ -64,3 +82,46 @@ exports.deleteUser = function(req,res) {
         res.status(204).send(results);
     });
 };
+
+exports.login = function(req,res) {
+    var sql = "SELECT * FROM user WHERE email='"+req.body.email+"'";
+    conn.query(sql, (err,results) => {
+ 
+        if(err) {
+             throw err;
+        } else {
+            if(results.length == 0) {
+                res.status(404).json({
+                    'message': "Email not correct"
+                });
+            } else {
+                let data = new user(results[0]);
+                console.log(data.password);
+                bcrypt.compare(req.body.password, data.password, (err , result) => {
+                    if(results == true) {
+                        console.log("password is correct");
+                    } else {
+                        console.log("password not correct")
+                    }
+                });
+            }
+        }
+    });
+};
+
+// checkExistEmail = async function(email) {
+//         let isExistEmail
+//         let sql =  "SELECT * FROM user WHERE email='"+email+"'";
+//         let query = await conn.query(sql, (err, results) => {
+//             if(err) {
+//                 throw err;
+//             } else {
+//                 console.log(results.length);
+//                 if(results.length == 0) {
+//                 return this.isExistEmail = false;
+//                 } else {
+//                 return this.isExistEmail = true;
+//                 }
+//             }
+//         });
+// };
