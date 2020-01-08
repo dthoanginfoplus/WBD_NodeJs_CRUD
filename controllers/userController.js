@@ -81,19 +81,20 @@ exports.findUserById = function(req,res) {
 
 exports.updateUser = function(req,res) {
     var reqtoken = req.headers['x-access-token'];
+    var id = req.params.id;
+    var data = new user(req.body);
+    // var sql = "UPDATE user SET name='"+data.name+"', email='"+data.email+"', WHERE id=" + id;
+    let sql = "UPDATE user SET name='"+data.name+"', email='"+data.email+"' WHERE id="+req.params.id;
+
+    // var sql = "UPDATE user SET ? where id=" + id;
     if (!reqtoken) return res.status(401).send({ auth: false, message: 'No token provided.' });
     
     jwt.verify(reqtoken, config.secret, function(err, decoded) {
       if (err) return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
-
-
-    var id = req.params.id;
-    var data = new user(req.body);
-    // var sql = "UPDATE user SET name='"+data.name+"', username='"+data.username+"', password='"+data.password+"', email='"+data.email+"', WHERE id="+id;
-    var sql = "UPDATE user SET ? where id=" + id;
-    conn.query(sql,data, (err, results) => {
+   
+    conn.query(sql, (err, results) => {
         if(err) throw err;
-        res.status(201).send(results);
+        res.status(201).send({message: 'updated'});
     });
     });
 };
