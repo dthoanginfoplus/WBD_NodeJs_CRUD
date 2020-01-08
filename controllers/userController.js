@@ -80,6 +80,13 @@ exports.findUserById = function(req,res) {
 };
 
 exports.updateUser = function(req,res) {
+    var reqtoken = req.headers['x-access-token'];
+    if (!reqtoken) return res.status(401).send({ auth: false, message: 'No token provided.' });
+    
+    jwt.verify(reqtoken, config.secret, function(err, decoded) {
+      if (err) return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
+
+
     var id = req.params.id;
     var data = new user(req.body);
     // var sql = "UPDATE user SET name='"+data.name+"', username='"+data.username+"', password='"+data.password+"', email='"+data.email+"', WHERE id="+id;
@@ -87,6 +94,7 @@ exports.updateUser = function(req,res) {
     conn.query(sql,data, (err, results) => {
         if(err) throw err;
         res.status(201).send(results);
+    });
     });
 };
 
