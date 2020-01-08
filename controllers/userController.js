@@ -99,6 +99,53 @@ exports.updateUser = function(req,res) {
     });
 };
 
+exports.updatePassword = function(req,res) {
+    var reqtoken = req.headers['x-access-token'];
+    var id = req.params.id;
+    var currentPassword = req.body.currentPassword;
+    var newPassword = req.body.newPassword;
+    var sql = "SELECT * FROM user WHERE id=" + id;
+
+    // var sql = "UPDATE user SET ? where id=" + id;
+    if (!reqtoken) return res.status(401).send({ auth: false, message: 'No token provided.' });
+    jwt.verify(reqtoken, config.secret, function(err, decoded) {
+        if (err) return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });    
+    });
+   
+    conn.query(sql, (err, results) => {
+        let data = new user(results[0]);
+        console.log(data.password);
+        if(err) {
+            throw err;
+        } else {
+            if(results.length == 0) {
+                res.status(404).send({
+					'msg': "Not Found"
+				});;
+            } else {
+                bcrypt.compare(currentPassword, data.password, (err , next) => {
+                    console.log(next)
+                    if(next == true) {  
+                        bcrypt.hash(req.body.newPassword, saltRounds, function (err, hashPassword) {
+                            console.log(hashPassword)
+                            let sql = "UPDATE user SET password='"+hashPassword+"' WHERE id=" + id;
+                            conn.query(sql, (err, result) => {
+                            if(err) throw err;
+                            return res.status(201).send({'message':"Updated Password"});
+                            });
+                            });
+                    } else {
+                        console.log("password not correct")
+                        res.status(404).json({
+                            'msg': "password not correct"
+                        });;
+                    }
+                });
+            }
+        }
+    });
+};
+
 exports.deleteUser = function(req,res) {
     var id = req.params.id;
     var sql = "DELETE FROM user WHERE id=" + id;
