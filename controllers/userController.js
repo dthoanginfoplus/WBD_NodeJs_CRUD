@@ -29,7 +29,7 @@ exports.getUser = function (req, res) {
 exports.createUser = function(req,res) {
     var data =  new user(req.body);
     let sql =  "SELECT * FROM user WHERE email='"+data.email+"'";
-        let query = conn.query(sql, (err, results) => {
+        conn.query(sql, (err, results) => {
             if(err) {
                 throw err;
             } else {
@@ -61,7 +61,7 @@ exports.findUserById = function(req,res) {
             if(results.length == 0) {
                 res.status(404).json({
 					'msg': "Not Found"
-				});;
+				});
             } else {
                 console.log()
             res.status(200).send(results);
@@ -155,7 +155,7 @@ exports.login = function(req,res) {
                         console.log("password not correct")
                         res.status(404).json({
                             'msg': "password not correct"
-                        });;
+                        });
                     }
                 });
             }
