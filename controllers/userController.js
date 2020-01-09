@@ -36,7 +36,7 @@ exports.createUser = function(req,res) {
                 if(results.length == 0) {
                     bcrypt.hash(req.body.password, saltRounds, function (err, result) {
                     data.password = result;
-                    let sql = "INSERT INTO user SET ?";
+                    sql = "INSERT INTO user SET ?";
                     conn.query(sql,data, (err, results) => {
                     if(err) throw err;
                     return res.status(200).send({'message':"Created User"});
@@ -52,8 +52,8 @@ exports.createUser = function(req,res) {
 };
 
 exports.findUserById = function(req,res) {
-    var id = req.params.id;
-    var sql = "SELECT * FROM user WHERE id=" + id;
+    var userId = req.params.id;
+    var sql = "SELECT * FROM user WHERE id=" + userId;
     conn.query(sql, (err, results) => {
         if(err) {
             throw err;
@@ -71,9 +71,9 @@ exports.findUserById = function(req,res) {
 };
 
 exports.updateUser = function(req,res) {
-    var id = req.params.id;
+    var userId = req.params.id;
     var data = new user(req.body);
-    let sql = "UPDATE user SET name='"+data.name+"', email='"+data.email+"' WHERE id="+req.params.id;
+    let sql = "UPDATE user SET name='"+data.name+"', email='"+data.email+"' WHERE id=" + userId;
     conn.query(sql, (err, results) => {
         if(err) throw err;
         res.status(201).send({message: 'updated'});
@@ -81,10 +81,10 @@ exports.updateUser = function(req,res) {
 };
 
 exports.updatePassword = function(req,res) {
-    var id = req.params.id;
+    var userId = req.params.id;
     var currentPassword = req.body.currentPassword;
     var newPassword = req.body.newPassword;
-    var sql = "SELECT * FROM user WHERE id=" + id;
+    var sql = "SELECT * FROM user WHERE id=" + userId;
     conn.query(sql, (err, results) => {
         let data = new user(results[0]);
         console.log(data.password);
@@ -99,9 +99,9 @@ exports.updatePassword = function(req,res) {
                 bcrypt.compare(currentPassword, data.password, (err , next) => {
                     console.log(next)
                     if(next == true) {  
-                        bcrypt.hash(req.body.newPassword, saltRounds, function (err, hashPassword) {
+                        bcrypt.hash(newPassword, saltRounds, function (err, hashPassword) {
                             console.log(hashPassword)
-                            let sql = "UPDATE user SET password='"+hashPassword+"' WHERE id=" + id;
+                            let sql = "UPDATE user SET password='"+hashPassword+"' WHERE id=" + userId;
                             conn.query(sql, (err, result) => {
                             if(err) throw err;
                             return res.status(201).send({'message':"Updated New Password"});
@@ -111,7 +111,7 @@ exports.updatePassword = function(req,res) {
                         console.log("password not correct")
                         res.status(404).json({
                             'message': "Current password not correct"
-                        });;
+                        });
                     }
                 });
             }
@@ -120,8 +120,8 @@ exports.updatePassword = function(req,res) {
 };
 
 exports.deleteUser = function(req,res) {
-    var id = req.params.id;
-    var sql = "DELETE FROM user WHERE id=" + id;
+    var userId = req.params.id;
+    var sql = "DELETE FROM user WHERE id=" + userId;
     conn.query(sql, (err, results) => {
         if(err) throw err;
         res.status(204).send(results);

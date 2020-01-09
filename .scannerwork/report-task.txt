@@ -1,0 +1,7 @@
+organization=dthoanginfoplus
+projectKey=dthoanginfoplus_WBD_NodeJs_CRUD
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.3934
+dashboardUrl=https://sonarcloud.io/dashboard?id=dthoanginfoplus_WBD_NodeJs_CRUD
+ceTaskId=AW-Jju5llXTE3qmvUYrf
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AW-Jju5llXTE3qmvUYrf
