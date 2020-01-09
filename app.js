@@ -4,8 +4,8 @@ var app = express();
 const bodyParser = require('body-parser');
 const port = 3000;
 var CORS = require('cors');
-var user = require('../WBD_NodeJs_CRUD/routes/userRoute');
-// var user = require('../crudd/routes/userRoute');
+// var user = require('../WBD_NodeJs_CRUD/routes/userRoute');
+var user = require('../crudd/routes/userRoute');
 
 // parse application/json
 app.use(bodyParser.json());
